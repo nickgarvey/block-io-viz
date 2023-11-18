@@ -1,0 +1,3 @@
+[workspace]
+members = ["xtask", "block-io-viz", "block-io-viz-common"]
+resolver = "2"
