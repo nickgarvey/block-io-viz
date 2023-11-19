@@ -5,10 +5,11 @@ edition = "2021"
 
 [features]
 default = []
-user = ["aya"]
+user = ["serde", "aya"]
 
 [dependencies]
 aya = { git = "https://github.com/aya-rs/aya", optional = true }
+serde = {version = "1.*", features = ["derive"], optional = true}
 
 [lib]
 path = "src/lib.rs"

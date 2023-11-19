@@ -37,7 +37,7 @@ pub fn program_detach(bpf: &mut Bpf, trace_id: TracePointLinkId) -> Result<(), P
 
 pub async fn do_bpf_poll_loop<T>(
     bpf: &mut Bpf,
-    handle_fn: &impl Fn(&T) -> Result<(), anyhow::Error>,
+    handle_fn: &impl Fn(T) -> Result<(), anyhow::Error>,
 ) -> Result<(), anyhow::Error> {
     let ring_buf = RingBuf::try_from(bpf.map_mut("RING_BUF").unwrap())?;
     let mut async_fd = AsyncFd::new(ring_buf)?;
@@ -48,7 +48,7 @@ pub async fn do_bpf_poll_loop<T>(
         while let Some(event) = inner.next() {
             debug!("event: {:?}", event);
             let event = unsafe { ptr::read_unaligned::<T>(event.as_ptr() as *const T) };
-            handle_fn(&event)?;
+            handle_fn(event)?;
         }
         guard.clear_ready();
     }
