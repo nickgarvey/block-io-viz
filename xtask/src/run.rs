@@ -3,7 +3,10 @@ use std::process::Command;
 use anyhow::Context as _;
 use clap::Parser;
 
-use crate::build_ebpf::{build_ebpf, Architecture, Options as BuildOptions};
+use crate::{
+    build_ebpf::{build_ebpf, Architecture, Options as BuildOptions},
+    webpack::{webpack, Options as WebpackOptions},
+};
 
 #[derive(Debug, Parser)]
 pub struct Options {
@@ -44,6 +47,11 @@ pub fn run(opts: Options) -> Result<(), anyhow::Error> {
     })
     .context("Error while building eBPF program")?;
     build(&opts).context("Error while building userspace application")?;
+
+    webpack(WebpackOptions {
+        mode: "development".to_string(),
+    })
+    .context("Error while doing webpack")?;
 
     // profile we are building (release or debug)
     let profile = if opts.release { "release" } else { "debug" };
