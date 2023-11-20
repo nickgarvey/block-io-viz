@@ -3,14 +3,14 @@ use tokio::{
     net::{TcpListener, TcpStream},
     sync::broadcast::{error::RecvError, Receiver, Sender},
 };
-pub struct WebServer {
+pub struct WebSocketServer {
     listener: TcpListener,
     tx: Sender<Message>,
 }
 use futures_util::SinkExt;
 use tokio_tungstenite::tungstenite::Message;
 
-impl WebServer {
+impl WebSocketServer {
     pub async fn new(addr: &str, tx: Sender<Message>) -> Result<Self, std::io::Error> {
         let listener = TcpListener::bind(addr).await?;
         Ok(Self { listener, tx })

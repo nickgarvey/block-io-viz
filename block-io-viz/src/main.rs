@@ -6,7 +6,8 @@ use tokio::signal;
 use tokio::sync::broadcast;
 
 mod bpf;
-mod webserver;
+mod static_webserver;
+mod websocket_server;
 
 const ADDR: &str = "0.0.0.0:2828";
 
@@ -19,7 +20,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let (tx, _) = broadcast::channel(1024);
 
-    let webserver = webserver::WebServer::new(&ADDR, tx.clone())
+    let webserver = websocket_server::WebSocketServer::new(&ADDR, tx.clone())
         .await
         .expect("Can't listen");
 
@@ -41,6 +42,9 @@ async fn main() -> Result<(), anyhow::Error> {
         },
         Err(e) = webserver.run() => {
             error!("error in webserver: {:?}", e);
+        },
+        Err(e) = static_webserver::bind_and_serve() => {
+            error!("error in static webserver: {:?}", e);
         },
         _ = signal::ctrl_c() => {
             info!("Ctrl-c received, detaching tracepoint...");

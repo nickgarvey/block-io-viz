@@ -16,6 +16,7 @@ tokio = { version = "1.25", features = ["macros", "rt", "rt-multi-thread", "net"
 tokio-tungstenite = "0.*"
 futures-util = "0.*"
 rmp-serde = "1.*"
+axum = "0.*"
 
 [[bin]]
 name = "block-io-viz"
