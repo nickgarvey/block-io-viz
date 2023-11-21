@@ -1,26 +1,9 @@
 # block-io-viz
 
-## Prerequisites
+Visualization of reads & writes to a block device.
 
-1. Install bpf-linker: `cargo install bpf-linker`
+It does this by loading an eBPF program to monitor disk I/O, and then serves that data to a frontend via a websocket.
 
-## Build eBPF
+Work in progress.
 
-```bash
-cargo xtask build-ebpf
-```
-
-To perform a release build you can use the `--release` flag.
-You may also change the target architecture with the `--target` flag.
-
-## Build Userspace
-
-```bash
-cargo build
-```
-
-## Run
-
-```bash
-RUST_LOG=info cargo xtask run
-```
+![block-io-viz demo gif](https://raw.githubusercontent.com/nickgarvey/block-io-viz/main/block-io-viz-demo.gif)
