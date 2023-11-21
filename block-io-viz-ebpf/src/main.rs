@@ -27,12 +27,20 @@ const RWBS_OFFSET: usize = 32;
 const RWBS_LEN: usize = 8;
 
 fn try_block_io_viz(ctx: TracePointContext) -> Result<i64, i64> {
+    let dev = unsafe { ctx.read_at::<u32>(DEV_T_OFFSET)? };
     let event = unsafe {
         BlockIOEvent {
             sector: ctx.read_at::<u64>(SECTOR_OFFSET)?,
             nr_sector: ctx.read_at::<u32>(NR_SECTOR_OFFSET)?,
             rwbs: ctx.read_at::<[u8; RWBS_LEN]>(RWBS_OFFSET)?,
-            dev_t: ctx.read_at::<u32>(DEV_T_OFFSET)?,
+            major: {
+                // major is the upper 20 bits of dev
+                dev >> 20
+            },
+            minor: {
+                // minor is the lower 12 bits of dev
+                dev & 0xfff
+            },
         }
     };
 

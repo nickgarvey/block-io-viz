@@ -9,5 +9,6 @@ pub struct BlockIOEvent {
     pub sector: u64,
     pub nr_sector: u32,
     pub rwbs: [u8; 8],
-    pub dev_t: u32,
+    pub major: u32,
+    pub minor: u32,
 }
