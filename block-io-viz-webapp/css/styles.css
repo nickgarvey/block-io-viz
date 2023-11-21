@@ -1,5 +1,28 @@
-#box {
-    height: 100px;
-    width: 100px;
-    background-color: black;
+body {
+    background-color: rgb(24, 24, 24);
+    display: flex;
+}
+
+#render_background {
+    margin: auto;
+    height: min(80vh, 80vw);
+    width: min(80vh, 80vw);
+    background-color: rgb(46, 55, 55);
+    font-family: sans-serif;
+    display: flex;
+    position: relative;
+}
+
+#device_text {
+    color: white;
+    margin: auto;
+    opacity: 0.5;
+    font-size: 4vw;
+}
+
+.box {
+    width: 1px;
+    height: 1px;
+    background-color: yellow;
+    position: absolute;
 }

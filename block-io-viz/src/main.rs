@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use block_io_viz_common::BlockIOEvent;
 use log::{debug, error, info};
 use tokio_tungstenite::tungstenite::Message;
@@ -5,11 +7,14 @@ use tokio_tungstenite::tungstenite::Message;
 use tokio::signal;
 use tokio::sync::broadcast;
 
+use crate::static_webserver::BlockDeviceInfo;
+
 mod bpf;
 mod static_webserver;
 mod websocket_server;
 
 const ADDR: &str = "0.0.0.0:2828";
+const STATIC_ADDR: &str = "0.0.0.0:80";
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -36,6 +41,7 @@ async fn main() -> Result<(), anyhow::Error> {
         }
     };
 
+    let static_addr: SocketAddr = STATIC_ADDR.parse().unwrap();
     tokio::select! {
         Err(e) = bpf::do_bpf_poll_loop(&mut bpf, &push_event) => {
             error!("error in poll loop: {:?}", e);
@@ -43,7 +49,10 @@ async fn main() -> Result<(), anyhow::Error> {
         Err(e) = webserver.run() => {
             error!("error in webserver: {:?}", e);
         },
-        Err(e) = static_webserver::bind_and_serve() => {
+        Err(e) = static_webserver::bind_and_serve(static_addr, BlockDeviceInfo{
+            name: "sda".to_string(),
+            size_sectors: 68719476736 / 512,
+        }) => {
             error!("error in static webserver: {:?}", e);
         },
         _ = signal::ctrl_c() => {
