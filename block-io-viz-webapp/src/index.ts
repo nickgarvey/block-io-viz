@@ -1,13 +1,34 @@
 import { decode } from '@msgpack/msgpack';
 import { animate } from "motion"
 
-const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-const wsUrl = wsScheme + "://" + window.location.hostname + ":2828";
-const socket = new WebSocket(wsUrl);
+let blockDeviceSectors = 0;
 
-socket.addEventListener('open', (event) => {
-    console.log('Connection established');
-})
+function bindWebSocket(port: number) {
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsUrl = wsScheme + "://" + window.location.hostname + ":" + port;
+    const socket = new WebSocket(wsUrl);
+    socket.addEventListener('open', (event) => {
+        console.log('Connection established');
+    });
+    socket.addEventListener('message', handleMessage);
+}
+
+fetch('/block_device.json')
+    .then(response => response.json())
+    .then(data => {
+        const device_text = document.getElementById("device_text");
+        if (device_text === null) {
+            return;
+        }
+        device_text.innerText = data['name'];
+        blockDeviceSectors = data['size_sectors'];
+        bindWebSocket(data['websocket_port']);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+
+
 
 enum IOMode {
     READ = 'READ',
@@ -71,7 +92,9 @@ function genId(): string {
     return "box-" + id++;
 }
 
-socket.addEventListener('message', (eventBuf) => {
+const ROWS = 10;
+
+function handleMessage(eventBuf: MessageEvent<any>) {
     let event = decodeBuffer(eventBuf).then((event) => {
         if (event === null) {
             return;
@@ -83,33 +106,32 @@ socket.addEventListener('message', (eventBuf) => {
             return;
         }
 
+        if (blockDeviceSectors === 0) {
+            return;
+        }
+
         let box = document.createElement('div');
         box.id = genId();
         box.classList.add('box');
         bg.appendChild(box);
 
-        const BLOCK_DEV_SECTORS = Math.floor(68719476736 / 512);
-        const ROWS = 10;
 
-        const sectorsPerRow = Math.floor(BLOCK_DEV_SECTORS / ROWS);
+        const sectorsPerRow = Math.floor(blockDeviceSectors / ROWS);
         const width = event.nr_sectors / sectorsPerRow * 100 + "%";
 
-        const row = Math.floor(ROWS * (event.sector / BLOCK_DEV_SECTORS))
+        const row = Math.floor(ROWS * (event.sector / blockDeviceSectors))
         box.style.width = "max(" + width + ", 1%)";
         box.style.height = (100 / ROWS) + "%";
         box.style.backgroundColor = event.mode == IOMode.READ ? "green" : "red";
         box.style.left = (event.sector % sectorsPerRow) / sectorsPerRow * 100 + "%";
         box.style.top = ((row / ROWS) * 100) + "%";
 
-
         animate(
             "#" + box.id,
-            {
-                opacity: 0,
-            },
+            { opacity: 0, },
             { duration: 1, allowWebkitAcceleration: true }
         ).finished.then(() => {
             box.remove();
         });
     });
-});
+}

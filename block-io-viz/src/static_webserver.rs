@@ -3,22 +3,25 @@ use std::net::SocketAddr;
 use axum::{response::Html, response::Json, routing::get, Router};
 
 #[derive(Clone, serde::Serialize)]
-pub struct BlockDeviceInfo {
+pub struct InitializationData {
     pub name: String,
     pub size_sectors: u64,
+    pub websocket_port: u16,
 }
 
 pub async fn bind_and_serve(
     addr: SocketAddr,
-    block_device: BlockDeviceInfo,
+    initialization_data: InitializationData,
 ) -> Result<(), std::io::Error> {
-    let block_json = Json(block_device);
+    let initialization_json = Json(initialization_data);
     let app = Router::new()
         .route("/", get(root))
         .route("/app.js", get(app_js))
-        .route("/block_device.json", get(|| async move { block_json }))
+        .route(
+            "/block_device.json",
+            get(|| async move { initialization_json }),
+        )
         .route("/styles.css", get(styles_css));
-    //let addr: SocketAddr = "0.0.0.0:80".parse().unwrap();
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())

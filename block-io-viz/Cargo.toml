@@ -18,6 +18,7 @@ futures-util = "0.*"
 rmp-serde = "1.*"
 axum = "0.*"
 serde = {version = "1.*", features = ["derive"]}
+caps = "0.*"
 
 [[bin]]
 name = "block-io-viz"

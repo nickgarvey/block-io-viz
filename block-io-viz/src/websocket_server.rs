@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use log::{debug, error, info, warn};
 use tokio::{
     net::{TcpListener, TcpStream},
@@ -11,7 +13,7 @@ use futures_util::SinkExt;
 use tokio_tungstenite::tungstenite::Message;
 
 impl WebSocketServer {
-    pub async fn new(addr: &str, tx: Sender<Message>) -> Result<Self, std::io::Error> {
+    pub async fn new(addr: &SocketAddr, tx: Sender<Message>) -> Result<Self, std::io::Error> {
         let listener = TcpListener::bind(addr).await?;
         Ok(Self { listener, tx })
     }
